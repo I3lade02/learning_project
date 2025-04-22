@@ -46,6 +46,18 @@ def show_settings():
     screen.blit(controls_text_4, (screen_width // 2 - controls_text_4.get_width() // 2, screen_height // 2 + 50))
     pygame.display.update()
 
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+            if event.type == pygame.KEYDOWN:
+                if event.type == pygame.K_ESCAPE:
+                    waiting = False
+                    show_menu()
+
 def game_loop():
     player = Player(screen_width, screen_height)
     falling_objects = [FallingObject(screen_width, screen_height) for _ in range(5)]
@@ -132,6 +144,9 @@ def main():
                 if event.key == pygame.K_q:
                     pygame.quit()
                     quit()
+                
+                if event.key == pygame.K_ESCAPE:
+                    show_menu()
 
 if __name__ == "__main__":
     main()
