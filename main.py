@@ -18,6 +18,7 @@ white = (255, 255, 255)
 black = (0, 0, 0)
 blue = (0, 0, 255)
 red = (255, 0, 0)
+green = (0, 255, 0)
 
 # Frame rate
 clock = pygame.time.Clock()
@@ -56,6 +57,7 @@ def show_menu():
     start_text = font.render("Press 'Enter' to Start", True, black)
     settings_text = font.render("Press 'Space' for Settings", True, black)
     quit_text = font.render("Press 'Q' to Quit", True, black)
+    difficulty_text = font.render("Press 'D' for difficutly settings", True, black)
 
     # Display the high score at the top of the menu
     high_score = load_high_score()
@@ -66,7 +68,8 @@ def show_menu():
     screen.blit(high_score_text, (screen_width // 2 - high_score_text.get_width() // 2, screen_height // 3))  
     screen.blit(start_text, (screen_width // 2 - start_text.get_width() // 2, screen_height // 2 - 50))
     screen.blit(settings_text, (screen_width // 2 - settings_text.get_width() // 2, screen_height // 2))
-    screen.blit(quit_text, (screen_width // 2 - quit_text.get_width() // 2, screen_height // 2 + 50))
+    screen.blit(difficulty_text, (screen_width // 2 - difficulty_text.get_width() // 2, screen_height // 2 + 50))
+    screen.blit(quit_text, (screen_width // 2 - quit_text.get_width() // 2, screen_height // 2 + 100))
     pygame.display.update()
 
 # Function to display the settings screen
@@ -100,14 +103,32 @@ def show_settings():
                     show_menu()
 
 # Main game loop
-def game_loop():
+def game_loop(difficulty):
+    
+    if difficulty == 'easy':
+        fall_speed = 3
+        object_frequency = 3
+    elif difficulty == 'medium':
+        fall_speed = 5
+        object_frequency = 5
+    elif difficulty == 'hard':
+        fall_speed = 7
+        object_frequency = 7
+    
     player = Player(screen_width, screen_height)
-    falling_objects = [FallingObject(screen_width, screen_height, blue) for _ in range(5)]  # Red falling objects
-    green_bricks = [GreenBrick(screen_width, screen_height) for _ in range(3)]  # Green bricks that reduce life
+    falling_objects = [FallingObject(screen_width, screen_height, blue) for _ in range(object_frequency)]  # Red falling objects
+    green_bricks = [GreenBrick(screen_width, screen_height) for _ in range(object_frequency)]  # Green bricks that reduce life
     score = 0
     lives = 3  # Player starts with 3 lives
     game_paused = False  # Variable to track if the game is paused
     flash_counter = 0
+
+    
+    for obj in falling_objects:
+        obj.speed = fall_speed
+    
+    for green_brick in green_brick:
+        green_brick.speed = fall_speed
 
     while True:
         for event in pygame.event.get():
@@ -227,6 +248,33 @@ def game_over_screen(score):
                     pygame.quit()
                     quit()
 
+def show_difficulty_menu():
+    font = pygame.font.SysFont(None, 50)
+    easy_text = font.render("Easy (Press 1)", True, green)
+    medium_text = font.render("Medium (Press 2)", True, blue)
+    hard_text = font.render("Hard (Press 3)", True, red)
+
+    screen.fill(white)
+    screen.blit(easy_text, (screen_width // 2 - easy_text.get_width() // 2, screen_height // 2 - 50))
+    screen.blit(medium_text, (screen_width // 2 - medium_text.get_width() // 2, screen_height // 2))
+    screen.blit(hard_text, (screen_width // 2 - hard_text.get_width() // 2, screen_height // 2 + 50))
+    pygame.display.update()
+
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_a:
+                    return 'easy'
+                if event.key == pygame.K_b:
+                    return 'medium'
+                if event.key == pygame.K_c:
+                    return 'hard'
+
 # Start the game
 def main():
     # Display the menu first
@@ -244,7 +292,8 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     waiting = False  # Break the loop to start the game
-                    game_loop()
+                    difficulty = show_difficulty_menu()
+                    game_loop(difficulty)
 
                 # If player presses Space, show the settings screen
                 if event.key == pygame.K_SPACE:
