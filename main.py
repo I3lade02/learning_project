@@ -16,10 +16,14 @@ pygame.display.set_caption("Catch the Falling Objects")
 white = (255, 255, 255)
 black = (0, 0, 0)
 blue = (0, 0, 255)
+red = (255, 0, 0)
 
 # Frame rate
 clock = pygame.time.Clock()
 fps = 60
+
+#duration of life loss effect in fps
+flash_duration = 10
 
 # Function to display the menu
 def show_menu():
@@ -69,11 +73,12 @@ def show_settings():
 # Main game loop
 def game_loop():
     player = Player(screen_width, screen_height)
-    falling_objects = [FallingObject(screen_width, screen_height, (255, 0, 0)) for _ in range(5)]  # Red falling objects
-    green_bricks = [GreenBrick(screen_width, screen_height) for _ in range(2)]  # Green bricks that reduce life
+    falling_objects = [FallingObject(screen_width, screen_height, blue) for _ in range(5)]  # Red falling objects
+    green_bricks = [GreenBrick(screen_width, screen_height) for _ in range(3)]  # Green bricks that reduce life
     score = 0
     lives = 3  # Player starts with 3 lives
     game_paused = False  # Variable to track if the game is paused
+    flash_counter = 0
 
     while True:
         for event in pygame.event.get():
@@ -88,7 +93,11 @@ def game_loop():
                     pygame.quit()
                     quit()
 
-        screen.fill(white)
+        if flash_counter > 0:
+            screen.fill(red)
+            flash_counter -= 1
+        else:
+            screen.fill(white)
 
         # Pause screen
         if game_paused:
@@ -119,6 +128,7 @@ def game_loop():
             if player.check_collision(green_brick):
                 lives -= 1  # Reduce life when a green brick is caught
                 green_brick.reset_position()
+                flash_counter = flash_duration
 
             # If green brick falls below the screen, reset it
             if green_brick.y > screen_height:
