@@ -1,7 +1,8 @@
 import pygame
 from player import Player
-from falling_object import FallingObject, GreenBrick  # Correct import for GreenBrick
-import random
+from falling_object import FallingObject, GreenBrick 
+import json
+import os
 
 # Initialize Pygame
 pygame.init()
@@ -25,6 +26,29 @@ fps = 60
 #duration of life loss effect in fps
 flash_duration = 10
 
+def load_high_score():
+    if os.path.exists('high_score.json'):
+        try:
+            with open('high_score.json', 'r') as file:
+                high_score = json.load(file)
+                # Ensure high score is a valid integer, otherwise return 0
+                if not isinstance(high_score, int):
+                    return 0
+        except (json.JSONDecodeError, ValueError):  # Handle empty or corrupted file
+            return 0
+    else:
+        return 0  # Default to 0 if file doesn't exist
+    return high_score
+
+# Function to save the high score to a file
+def save_high_score(score):
+    high_score = load_high_score()  # Load the current high score
+    if score > high_score:  # If the current score is higher than the high score, save it
+        with open('high_score.json', 'w') as file:
+            json.dump(score, file)
+        return score
+    return high_score  # Return the existing high score if no change
+
 # Function to display the menu
 def show_menu():
     font = pygame.font.SysFont(None, 50)
@@ -32,9 +56,14 @@ def show_menu():
     start_text = font.render("Press 'Enter' to Start", True, black)
     settings_text = font.render("Press 'Space' for Settings", True, black)
     quit_text = font.render("Press 'Q' to Quit", True, black)
-    
+
+    # Display the high score at the top of the menu
+    high_score = load_high_score()
+    high_score_text = font.render(f"High Score: {high_score}", True, black)
+
     screen.fill(white)
     screen.blit(title_text, (screen_width // 2 - title_text.get_width() // 2, screen_height // 4))
+    screen.blit(high_score_text, (screen_width // 2 - high_score_text.get_width() // 2, screen_height // 3))  
     screen.blit(start_text, (screen_width // 2 - start_text.get_width() // 2, screen_height // 2 - 50))
     screen.blit(settings_text, (screen_width // 2 - settings_text.get_width() // 2, screen_height // 2))
     screen.blit(quit_text, (screen_width // 2 - quit_text.get_width() // 2, screen_height // 2 + 50))
@@ -166,15 +195,20 @@ def pause_screen():
 
 # Function to display game over screen
 def game_over_screen(score):
+    high_score = save_high_score(score)  # Save and get the high score
     font = pygame.font.SysFont(None, 50)
-    game_over_text = font.render(f"Game Over! Score: {score}", True, (0, 0, 0))
-    restart_text = font.render("Press 'R' to Restart", True, (0, 0, 0))
-    quit_text = font.render("Press 'Q' to Quit", True, (0, 0, 0))
+    game_over_text = font.render(f"Game Over! Score: {score}", True, black)
+    high_score_text = font.render(f"High Score: {high_score}", True, black)
+    restart_text = font.render("Press 'R' to Restart", True, black)
+    back_to_menu_text = font.render("Press 'Esc' to go back to menu", True, black)
+    quit_text = font.render("Press 'Q' to Quit", True, black)
 
     screen.fill(white)
     screen.blit(game_over_text, (screen_width // 2 - game_over_text.get_width() // 2, screen_height // 2 - game_over_text.get_height() // 2))
-    screen.blit(restart_text, (screen_width // 2 - restart_text.get_width() // 2, screen_height // 2 + 50))
-    screen.blit(quit_text, (screen_width // 2 - quit_text.get_width() // 2, screen_height // 2 + 100))
+    screen.blit(high_score_text, (screen_width // 2 - high_score_text.get_width() // 2, screen_height // 2 + 50))
+    screen.blit(restart_text, (screen_width // 2 - restart_text.get_width() // 2, screen_height // 2 + 100))
+    screen.blit(back_to_menu_text, (screen_width // 2 - back_to_menu_text.get_width() // 2, screen_height // 2 + 150))
+    screen.blit(quit_text, (screen_width // 2 - quit_text.get_width() // 2, screen_height // 2 + 200))
     pygame.display.update()
 
     waiting = True
@@ -187,6 +221,8 @@ def game_over_screen(score):
                 if event.key == pygame.K_r:  # Restart the game
                     waiting = False
                     game_loop()
+                if event.key == pygame.K_ESCAPE:
+                    show_menu()
                 if event.key == pygame.K_q:  # Quit the game
                     pygame.quit()
                     quit()
