@@ -250,9 +250,9 @@ def game_over_screen(score):
 
 def show_difficulty_menu():
     font = pygame.font.SysFont(None, 50)
-    easy_text = font.render("Easy (Press 1)", True, green)
-    medium_text = font.render("Medium (Press 2)", True, blue)
-    hard_text = font.render("Hard (Press 3)", True, red)
+    easy_text = font.render("Easy (Press a)", True, green)
+    medium_text = font.render("Medium (Press b)", True, blue)
+    hard_text = font.render("Hard (Press c)", True, red)
 
     screen.fill(white)
     screen.blit(easy_text, (screen_width // 2 - easy_text.get_width() // 2, screen_height // 2 - 50))
