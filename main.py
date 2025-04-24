@@ -127,7 +127,7 @@ def game_loop(difficulty):
     for obj in falling_objects:
         obj.speed = fall_speed
     
-    for green_brick in green_brick:
+    for green_brick in green_bricks:
         green_brick.speed = fall_speed
 
     while True:
